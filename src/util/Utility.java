@@ -1,5 +1,17 @@
 package util;
 
+import java.text.SimpleDateFormat;
+import java.util.Calendar;
+import java.util.Date;
+import java.util.Locale;
+
+import org.json.JSONArray;
+import org.json.JSONException;
+import org.json.JSONObject;
+
+import android.content.Context;
+import android.content.SharedPreferences;
+import android.preference.PreferenceManager;
 import android.text.TextUtils;
 import model.City;
 import model.CoolWeatherDB;
@@ -65,6 +77,56 @@ public class Utility {
 			} 
 		} 
 		return false;
+	}
+	
+	/**
+	* 解析服务器返回的JSON数据，并将解析出的数据存储到本地。
+	*/ 
+	public static void handleWeatherResponse(Context context,String response){ 
+		try {
+			JSONObject jsonObject = new JSONObject(response);
+			JSONObject data = jsonObject.getJSONObject("data");
+			String cityName = data.getString("city");
+			JSONArray forecast=data.getJSONArray("forecast");
+			JSONObject array1=forecast.getJSONObject(0);
+			String temp1=array1.getString("high");
+			String t[]=temp1.split(" ");
+			temp1=t[1];
+            String temp2=array1.getString("low");
+            t=temp2.split(" ");
+            temp2=t[1];
+            String weatherDesp=array1.getString("type");
+            String publishTime=array1.getString("date");
+			saveWeatherInfo(context, cityName,temp1, temp2,weatherDesp, publishTime);
+		} 
+		catch (JSONException e) {
+			e.printStackTrace();
+		}
+	}
+	/**
+	* 将服务器返回的所有天气信息存储到SharedPreferences文件中。
+	*/ 
+	public static void saveWeatherInfo(Context context, String cityName,String temp1, String temp2, String weatherDesp, String publishTime) {
+		//获取当前时间
+		long time=System.currentTimeMillis();
+		final Calendar mCalendar=Calendar.getInstance();
+		mCalendar.setTimeInMillis(time);
+		String mHour,mMinuts;
+		mHour=String.valueOf(mCalendar.get(Calendar.HOUR));
+		mMinuts=String.valueOf(mCalendar.get(Calendar.MINUTE));
+		
+		
+		SimpleDateFormat sdf = new SimpleDateFormat("yyyy年M月d日",Locale.CHINA);
+		SharedPreferences.Editor editor = PreferenceManager.getDefaultSharedPreferences(context).edit(); 
+		editor.putBoolean("city_selected", true); 
+		editor.putString("city_name", cityName); 
+		editor.putString("temp1", temp1); 
+		editor.putString("temp2", temp2); 
+		editor.putString("weather_desp", weatherDesp); 
+		editor.putString("publish_time", mHour+":"+mMinuts); 
+		editor.putString("current_date", sdf.format(new Date())); 
+		editor.commit();
+		
 	}
 
 }
