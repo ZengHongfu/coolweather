@@ -95,6 +95,9 @@ public class WeatherActivity extends Activity implements OnClickListener{
 			// 没有县级代号时就直接显示本地天气
 			showWeather();
 		} 
+		//启动服务
+		Intent intent = new Intent(this, AutoUpdateService.class); 
+		startService(intent);
 		switchCity.setOnClickListener(this); 
 		refreshWeather.setOnClickListener(this);
 	}
@@ -179,8 +182,7 @@ public class WeatherActivity extends Activity implements OnClickListener{
 		currentDateText.setText(prefs.getString("current_date", "")); 
 		weatherInfoLayout.setVisibility(View.VISIBLE); 
 		cityNameText.setVisibility(View.VISIBLE);
-		Intent intent = new Intent(this, AutoUpdateService.class); 
-		startService(intent);
+		
 	}
 	
 	
